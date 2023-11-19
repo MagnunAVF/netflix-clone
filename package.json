@@ -1,0 +1,16 @@
+{
+  "name": "netflix-clone",
+  "version": "1.0.0",
+  "description": "This application is a simple Netflix clone.",
+  "main": "index.js",
+  "scripts": {
+    "assets": "npx http-server --cors -p 8081 assets/",
+    "dev": "npx http-server --cors -p 8080 public/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
