@@ -7,6 +7,7 @@ class VideoMediaPlayer {
         this.sourceBuffer = null
         this.activeItem = {}
         this.selected = {}
+        this.selections = []
         this.videoDuration = 0
     }
 
@@ -55,6 +56,18 @@ class VideoMediaPlayer {
         this.activeItem = this.selected;
     }
 
+    async currentFileResolution() {
+        const LOWEST_RESOLUTION = 144
+        const prepareUrl = {
+            url: this.manifestJSON.finalizar.url,
+            fileResolution: LOWEST_RESOLUTION,
+            fileResolutionTag: this.manifestJSON.fileResolutionTag,
+            hostTag: this.manifestJSON.hostTag,
+        }
+        const url = this.network.parseManifestURL(prepareUrl)
+        return this.network.getProperResolution(url)
+    }
+
     async nextChunk(data) {
         const key = data.toLowerCase()
         const selected = this.manifestJSON[key]
@@ -63,6 +76,7 @@ class VideoMediaPlayer {
             // adjusts the time that the modal will appear based on current time
             at: parseInt(this.videoElement.currentTime + selected.at)
         }
+        this.manageLag(this.selected)
 
         // run the rest of the video at the same time that download the next segment
         this.videoElement.play()
@@ -70,10 +84,20 @@ class VideoMediaPlayer {
         await this.fileDownload(selected.url)
     }
 
+    manageLag(selected) {
+        if(!!~this.selections.indexOf(selected.url)) {
+            selected.at += 5
+            return;
+        }
+
+        this.selections.push(selected.url)
+    }
+
     async fileDownload(url) {
+        const fileResolution = await this.currentFileResolution()
         const prepareUrl = {
             url,
-            fileResolution: 360,
+            fileResolution,
             fileResolutionTag: this.manifestJSON.fileResolutionTag,
             hostTag: this.manifestJSON.hostTag
         }
